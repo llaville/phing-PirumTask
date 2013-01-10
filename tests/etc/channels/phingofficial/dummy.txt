@@ -1,0 +1,1 @@
+This file could be removed after cloning the project. Just to keep directory not empty !
