@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="testPirumTask" basedir="." default="testBuildServer">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="testRequiredDestDir">
+        <pirum />
+    </target>
+
+    <target name="testInvalidDestDir">
+        <pirum destdir="${phing.dir}/etc/path/to/unknown/directory" />
+    </target>
+
+    <target name="testIncompleteChannelDefinition">
+        <pirum destdir="${phing.dir}/etc/channels/phingofficial">
+            <mapping name="server">
+                <element key="name" value="pear.phing.info" />
+                <element key="summary" value="Phing PEAR channel" />
+            </mapping>
+        </pirum>
+    </target>
+
+    <target name="testBuildChannel"
+        description="Setting up a new channel"
+    >
+        <pirum destdir="${phing.dir}/etc/channels/phingofficial"
+            quiet="true"
+        >
+            <mapping name="server">
+                <element key="name" value="pear.phing.info" />
+                <element key="summary" value="Phing PEAR channel" />
+                <element key="alias" value="phing" />
+                <element key="url" value="http://pear.phing.info" />
+            </mapping>
+        </pirum>
+    </target>
+
+    <target name="testBuildServer"
+        description="update a PEAR Channel Server"
+    >
+        <pirum destdir="${phing.dir}/etc/channels/phingofficial"
+            quiet="true"
+        />
+    </target>
+
+    <target name="testAddRelease"
+        description="add a new release"
+    >
+        <pirum destdir="${phing.dir}/etc/channels/bartlett"
+            quiet="true"
+        >
+            <mapping name="releases">
+                <element key="add" value="${phing.dir}/tmp/Pirus-2.0.0.tgz" />
+            </mapping>
+        </pirum>
+    </target>
+
+    <target name="testRemoveRelease"
+        description="remove an old release"
+    >
+        <pirum destdir="${phing.dir}/etc/channels/bartlett"
+            quiet="true"
+        >
+            <mapping name="releases">
+                <element key="remove" value="${phing.dir}/tmp/Pirus-2.0.0.tgz" />
+            </mapping>
+        </pirum>
+    </target>
+
+    <target name="testMultipleTransactions"
+        description="multiple transactions at same time"
+    >
+        <pirum destdir="${phing.dir}/etc/channels/bartlett"
+            quiet="true"
+        >
+            <mapping name="releases">
+                <element key="add">
+                    <element value="${phing.dir}/tmp/Pirus-1.0.0.tgz" />
+                    <element value="${phing.dir}/tmp/Pirus-2.0.0.tgz" />
+                </element>
+            </mapping>
+        </pirum>
+    </target>
+
+</project>

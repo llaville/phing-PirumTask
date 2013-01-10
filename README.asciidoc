@@ -1,0 +1,306 @@
+= PirumTask
+:author:  Laurent Laville
+:revdate: 2013-01-10
+
+== Features
+
+* Create a PEAR Channel by providing only informations (name, summary, alias, url)
+* Update PEAR server files
+* Add one or more releases at same time
+* Remove one or more releases at same time
+* [pirus backend] uses your pre-defined servers themes
+
+== Dependencies
+
+Depending of your need (facility to customize templates or not), you must have installed either :
+
+* link:http://pear.pirum-project.org/[Pirum] 1.1.4, or
+* link:http://bartlett.laurent-laville.org/[Pirus] 2.0.0
+
+NOTE: _pirum_ or _pirus_ scripts must be accesible through the include_path of PHP.
+
+== License
+
+PirumTask is licensed under link:http://www.opensource.org/licenses/bsd-license.php[BSD]
+
+== Installation
+
+Download the script +phing/tasks/ext/PirumTask.php+
+from link:https://github.com/llaville/phing-PirumTask/blob/master/src/phing/tasks/ext/PirumTask.php[llaville/phing-PirumTask]
+to where ever you want.
+
+CAUTION: You have to fix the path related to classname below depending of where you put
+the class script +PirumTask.php+
+
+.In your project build file, you have to define the PirumTask with a +taskdef+ tag
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="your-project" basedir=".">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <!-- ... -->
+</project>
+----
+
+== Attributes
+
+[grid="rows"]
+[options="header",cols="3,2,10,3,2"]
+|===========================
+|Name |Type |Description |Default |Required
+|destdir | String | Destination directory for output files | n/a | Yes
+|force | Boolean | orce overwrite configuration file if it already exist | false | No
+|quiet | Boolean | Suppress Pirum chatter | false | No
+|===========================
+
+== Setting up a new channel
+
+* create a directory for your PEAR Channel Server `/path/to/channel/directory`
+* provide Channel informations (name, summary, alias, url) with a `<mapping>` tag as follow
+----
+<mapping name="server">
+    <element key="name" value="YOUR_PEAR_CHANNEL_NAME" />
+    <element key="summary" value="YOUR_PEAR_CHANNEL_SUMMARY" />
+    <element key="alias" value="YOUR_PEAR_CHANNEL_ALIAS" />
+    <element key="url" value="YOUR_PEAR_CHANNEL_URL" />
+</mapping>
+----
+* run the Pirum task with the _destdir_ attribute that identify your PEAR Channel directory
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="YOUR_PROJECT" basedir="." default="BuildChannel">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="BuildChannel"
+        description="create PEAR Channel Server"
+    >
+        <pirum destdir="/path/to/channel/directory">
+            <mapping name="server">
+                <element key="name" value="YOUR_PEAR_CHANNEL_NAME" />
+                <element key="summary" value="YOUR_PEAR_CHANNEL_SUMMARY" />
+                <element key="alias" value="YOUR_PEAR_CHANNEL_ALIAS" />
+                <element key="url" value="YOUR_PEAR_CHANNEL_URL" />
+            </mapping>
+        </pirum>
+    </target>
+
+</project>
+----
+
+You should have a `pirum.xml` file in your `/path/to/channel/directory`, with such content:
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<server>
+  <name>YOUR_PEAR_CHANNEL_NAME</name>
+  <summary>YOUR_PEAR_CHANNEL_SUMMARY</summary>
+  <alias>YOUR_PEAR_CHANNEL_ALIAS</alias>
+  <url>YOUR_PEAR_CHANNEL_URL</url>
+</server>
+----
+
+TIP: If you need to change informations of your PEAR Channel, modify them in the `<mapping>` tag,
+and set attribute _force_ to *true* and run again the pirum task.
+
+== Building a channel
+
+To build a channel in your phing file, just add this task to a target:
+----
+<pirum destdir="/path/to/channel/directory" />
+----
+
+Given our example above, we could build the channel using this simple target:
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="YOUR_PROJECT" basedir="." default="BuildChannel">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="BuildChannel"
+        description="update PEAR Channel Server"
+    >
+        <pirum destdir="/path/to/channel/directory" />
+    </target>
+
+</project>
+----
+
+== Adding a package to a channel
+
+Once you have a channel in place, you can very simply add a build PEAR package
+to the channel using a pirum task with a `<mapping>` tag like that
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="add" value="/path/to/build/package/Foo-1.0.0.tgz" />
+    </mapping>
+</pirum>
+----
+The above adds the package _Foo-1.0.0.tgz_ to the PEAR channel.
+
+When you have to add multiple packages at same time, use this mapping syntax:
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="add">
+            <element value="/path/to/build/package/Foo-1.0.0.tgz" />
+            <element value="/path/to/build/package/Bar-1.0.0.tgz" />
+        </element>
+    </mapping>
+</pirum>
+----
+The above adds the packages _Foo-1.0.0.tgz_ and _Bar-1.0.0.tgz_ to the PEAR channel.
+
+== Removing a package from a channel
+
+Once you have a channel in place, you can very simply remove a build PEAR package
+to the channel using a pirum task with a `<mapping>` tag like that
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="remove" value="/path/to/build/package/Foo-1.0.0.tgz" />
+    </mapping>
+</pirum>
+----
+The above removes the package _Foo-1.0.0.tgz_ to the PEAR channel.
+
+When you have to remove multiple packages at same time, use this mapping syntax:
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="remove">
+            <element value="/path/to/build/package/Foo-1.0.0.tgz" />
+            <element value="/path/to/build/package/Bar-1.0.0.tgz" />
+        </element>
+    </mapping>
+</pirum>
+----
+The above removes the packages _Foo-1.0.0.tgz_ and _Bar-1.0.0.tgz_ to the PEAR channel.
+
+== Combine add and remove actions
+
+Once you have a channel in place, you can very simply add and remove a build PEAR package
+to the channel using a pirum task with a `<mapping>` tag like that
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="remove" value="/path/to/build/package/Foo-1.0.0.tgz" />
+        <element key="add" value="/path/to/build/package/Baz-1.0.0.tgz" />
+    </mapping>
+</pirum>
+----
+The above removes the package _Foo-1.0.0.tgz_ and adds the package _Baz-1.0.0.tgz_
+to the PEAR channel.
+
+Your are also ability to apply multiple actions of the same category. In this condition
+use the pirum task with a `mapping` tag syntax as below:
+----
+<pirum destdir="/path/to/channel/directory">
+    <mapping name="releases">
+        <element key="remove">
+            <element value="/path/to/build/package/Foo-1.0.0.tgz" />
+            <element value="/path/to/build/package/Bar-1.0.0.tgz" />
+        </element>
+        <element key="add">
+            <element value="/path/to/build/package/Baz-1.0.0.tgz" />
+        </element>
+    </mapping>
+</pirum>
+----
+And so on ...
+
+== Themes with Pirus
+
+The pirum task used your themes, if you've installed link:https://github.com/llaville/Pirus[Pirus]
+2.0 or better.
+
+More information how to defined your templates can be found on official Pirus documentation,
+link:http://php5.laurent-laville.org/pirus/manual/current/en/getting-started.html[Getting Started] part.
+
+== Examples
+
+.Creating a PEAR Channel Server
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phing-PirumTask" basedir="." default="BuildChannel">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="BuildChannel"
+        description="create a PEAR Channel Server"
+    >
+        <pirum destdir="/var/pirum/servers/phingofficial">
+            <mapping name="server">
+                <element key="name" value="pear.phing.info" />
+                <element key="summary" value="Phing PEAR channel" />
+                <element key="alias" value="phing" />
+                <element key="url" value="http://pear.phing.info" />
+            </mapping>
+        </pirum>
+    </target>
+
+</project>
+----
+
+.Updates PEAR Channel Server
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phing-PirumTask" basedir="." default="UpdateChannel">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="UpdateChannel"
+        description="update PEAR server files"
+    >
+        <pirum destdir="/var/pirum/servers/phingofficial" />
+    </target>
+
+</project>
+----
+
+.Adds new releases
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phing-PirumTask" basedir="." default="AddReleases">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="AddReleases"
+        description="add two packages releases at same time"
+    >
+        <pirum destdir="/var/pirum/servers/phingofficial">
+            <mapping name="releases">
+                <element key="add"
+                    <element value="/tmp/build-phing/phing-2.4.14.tgz" />
+                    <element value="/tmp/build-phing/phingdocs-2.4.14.tgz" />
+                </element>
+            </mapping>
+        </pirum>
+    </target>
+
+</project>
+----
+
+.Removes old releases
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="phing-PirumTask" basedir="." default="RemoveReleases">
+
+    <taskdef name="pirum" classname="phing.tasks.ext.PirumTask" />
+
+    <target name="RemoveReleases"
+        description="remove two packages releases at same time"
+    >
+        <pirum destdir="/var/pirum/servers/phingofficial">
+            <mapping name="releases">
+                <element key="remove">
+                    <element value="/tmp/build-phing/phing-2.4.13.tgz" />
+                    <element value="/tmp/build-phing/phingdocs-2.4.13.tgz" />
+                </element>
+            </mapping>
+        </pirum>
+    </target>
+
+</project>
+----
