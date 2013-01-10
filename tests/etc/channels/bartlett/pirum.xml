@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<server>
+  <name>bartlett.laurent-laville.org</name>
+  <summary>Bartlett PEAR Channel</summary>
+  <alias>bartlett</alias>
+  <url>http://bartlett.laurent-laville.org</url>
+</server>
