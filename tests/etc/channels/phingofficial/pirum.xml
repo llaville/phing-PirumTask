@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<server>
-  <name>pear.phing.info</name>
-  <summary>Phing PEAR channel</summary>
-  <alias>phing</alias>
-  <url>http://pear.phing.info</url>
-</server>
